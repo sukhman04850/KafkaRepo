@@ -8,8 +8,13 @@ namespace ProductService
     {
         public ProductDbContext(DbContextOptions<ProductDbContext> options) : base(options)
         {
-               
+
         }
-       public DbSet<Products>Products { get; set; }
+        public DbSet<Products> Products { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Products>().HasKey(t => new { t.ProductID});
+
+        }
     }
 }

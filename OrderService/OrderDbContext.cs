@@ -11,5 +11,10 @@ namespace OrderService
         }
 
         public DbSet<Orders> Orders { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Orders>().HasKey(t=> new { t.OrderID });
+           
+        }
     }
 }

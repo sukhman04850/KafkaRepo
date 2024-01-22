@@ -14,9 +14,9 @@ namespace OrderService.KafkaConsumer
 {
     public class KafkaConsumers /*: IDisposable*/
     {
-        private readonly IConsumer<string, string> consumer;
+        private readonly IConsumer<string, string> _consumer;
         private readonly IServiceScopeFactory _serviceScope;
-        private readonly string topic;
+        private readonly string _topic;
 
         public KafkaConsumers(IConfiguration configuration, IServiceScopeFactory serviceScope)
         {
@@ -31,10 +31,10 @@ namespace OrderService.KafkaConsumer
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false
             };
-            consumer = new ConsumerBuilder<string, string>(config).Build();
-            topic = configuration["KafkaConfig:TopicName"] ?? throw new Exception("Error: Kafka is null");
+            _consumer = new ConsumerBuilder<string, string>(config).Build();
+            _topic = configuration["KafkaConfig:TopicName"] ?? throw new Exception("Error: Kafka is null");
             _serviceScope = serviceScope;
-            consumer.Subscribe(topic);
+            _consumer.Subscribe(_topic);
         }
         public async Task ExecuteAsync(CancellationToken tok)
         {
@@ -52,7 +52,7 @@ namespace OrderService.KafkaConsumer
                         try
                         {
 
-                            var consumeResult = await Task.Run(() => consumer.Consume(tok), tok);
+                            var consumeResult = await Task.Run(() => _consumer.Consume(tok), tok);
 
                             if (consumeResult != null && consumeResult.Message != null)
                             {
@@ -83,7 +83,7 @@ namespace OrderService.KafkaConsumer
 
 
                                     await orderService.AddOrder(table);
-                                    consumer.Commit();
+                                    _consumer.Commit();
                                 }
 
 
@@ -111,7 +111,7 @@ namespace OrderService.KafkaConsumer
             finally
             {
                /* consumer.Dispose();*/
-                consumer.Close();
+                _consumer.Close();
             }
         }
         /*  public void Dispose()
