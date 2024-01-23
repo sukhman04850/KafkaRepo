@@ -2,8 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OrderService;
 using OrderService.Interfaces;
+using OrderService.KafkaConfiguration;
+
 using OrderService.KafkaConsumer;
 using OrderService.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,7 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
       options.UseSqlServer(builder.Configuration.GetConnectionString("OrderConnectionString")));
 builder.Services.AddScoped<IOrderInterface, OrderRepository>();
 builder.Services.AddSingleton<KafkaConsumers>();
+builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("KafkaConfig"));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

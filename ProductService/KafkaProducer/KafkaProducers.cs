@@ -1,5 +1,7 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using ProductService.KafkaConfiguration;
 namespace ProductService.KafkaProducer
 {
     public class KafkaProducers
@@ -7,20 +9,20 @@ namespace ProductService.KafkaProducer
         private readonly IProducer<string, string> producer;
         private readonly string topic;
 
-        public KafkaProducers(IConfiguration configuration)
+        public KafkaProducers(IOptions<KafkaConfig> kafkaConfig)
         {
             var config = new ProducerConfig
             {
-                BootstrapServers = configuration["KafkaConfig:BootstrapServers"],
+                BootstrapServers = kafkaConfig.Value.BootstrapServers,
                 
                 SaslMechanism = SaslMechanism.Plain,
                 SecurityProtocol = SecurityProtocol.SaslSsl,
-                SaslUsername = configuration["KafkaConfig:SaslUsername"],
-                SaslPassword = configuration["KafkaConfig:SaslPassword"]
+                SaslUsername = kafkaConfig.Value.SaslUsername,
+                SaslPassword = kafkaConfig.Value.SaslPassword
             };
 
             producer = new ProducerBuilder<string, string>(config).Build();
-            topic = configuration["KafkaConfig:TopicName"] ?? throw new Exception("Error: TOpic Is Null");
+            topic = kafkaConfig.Value.TopicName ?? throw new Exception("Error: TOpic Is Null");
            
         }
 

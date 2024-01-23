@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using ProductService;
 using ProductService.Interface;
+using ProductService.KafkaConfiguration;
 using ProductService.KafkaProducer;
 using ProductService.Repository;
 
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<KafkaProducers>();
+builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("KafkaConfig"));
 builder.Services.AddDbContext<ProductDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BackendConnectionString")));
 

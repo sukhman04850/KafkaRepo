@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using OrderService.Interfaces;
+using OrderService.KafkaConfiguration;
 using OrderService.Model;
 using System;
 using System.Threading;
@@ -18,21 +20,21 @@ namespace OrderService.KafkaConsumer
         private readonly IServiceScopeFactory _serviceScope;
         private readonly string _topic;
 
-        public KafkaConsumers(IConfiguration configuration, IServiceScopeFactory serviceScope)
+        public KafkaConsumers(/*IConfiguration configuration*/ IOptions<KafkaConfig> kafkaConfig, IServiceScopeFactory serviceScope)
         {
             var config = new ConsumerConfig
             {
                 GroupId = "order-consumer-94",
-                BootstrapServers = configuration["KafkaConfig:BootstrapServers"],
+                BootstrapServers = kafkaConfig.Value.BootstrapServers,
+                SaslUsername = kafkaConfig.Value.SaslUsername,
+                SaslPassword = kafkaConfig.Value.SaslPassword,
                 SaslMechanism = SaslMechanism.Plain,
                 SecurityProtocol = SecurityProtocol.SaslSsl,
-                SaslUsername = configuration["KafkaConfig:SaslUsername"],
-                SaslPassword = configuration["KafkaConfig:SaslPassword"],
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false
             };
             _consumer = new ConsumerBuilder<string, string>(config).Build();
-            _topic = configuration["KafkaConfig:TopicName"] ?? throw new Exception("Error: Kafka is null");
+            _topic = kafkaConfig.Value.TopicName ?? throw new Exception("Error: Kafka is null");
             _serviceScope = serviceScope;
             _consumer.Subscribe(_topic);
         }
